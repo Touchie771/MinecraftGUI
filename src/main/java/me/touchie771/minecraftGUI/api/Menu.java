@@ -2,14 +2,20 @@ package me.touchie771.minecraftGUI.api;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Represents a Minecraft GUI menu that can be displayed to players.
@@ -32,6 +38,7 @@ public class Menu {
 
     private final Inventory menu;
     private final HashSet<SlotItem> items;
+    private final MenuClickHandler clickHandler;
 
     /**
      * Creates a new menu from the specified builder.
@@ -40,15 +47,29 @@ public class Menu {
      * @param builder the configured builder containing menu properties
      * @throws IllegalArgumentException if builder is null
      */
-    public Menu(@NotNull MenuBuilder builder) {
+    public Menu(@NotNull MenuBuilder builder, @NotNull Plugin plugin) {
         this.menu = Bukkit.createInventory(null, builder.inventorySize, builder.inventoryTitle);
         this.items = new HashSet<>(builder.items);
+        this.clickHandler = new MenuClickHandler(this.menu, plugin.getLogger());
+
+        // Copy click handlers from builder
+        for (Map.Entry<Integer, ClickHandler> entry : builder.clickHandlers.entrySet()) {
+            this.clickHandler.setClickHandler(entry.getKey(), entry.getValue());
+        }
+        
+        // Set close handler from builder
+        if (builder.closeHandler != null) {
+            this.clickHandler.setCloseHandler(builder.closeHandler);
+        }
 
         for (SlotItem item : items) {
             ItemStack itemStack = new ItemStack(item.material(), item.quantity());
             itemStack.editMeta(meta -> meta.displayName(item.itemName()));
             menu.setItem(item.itemSlot(), itemStack);
         }
+        
+        // Register event handlers
+        registerEvents(plugin);
     }
 
     /**
@@ -126,17 +147,69 @@ public class Menu {
     }
 
     /**
-     * Returns the SlotItem at the specified slot position.
-     * This is useful for handling inventory click events.
+     * Registers a click handler for the specified slot.
      * 
-     * @param slot the slot position to check (0-53 for chest inventories)
-     * @return the SlotItem at the specified slot, or null if the slot is empty
+     * @param slot the slot position (0-53 for chest inventories)
+     * @param handler the click handler to register
+     * @throws IllegalArgumentException if slot is invalid or handler is null
      */
-    public SlotItem getItemAt(int slot) {
-        return this.items.stream()
-                .filter(item -> item.itemSlot() == slot)
-                .findFirst()
-                .orElse(null);
+    public void onClick(int slot, @NotNull ClickHandler handler) {
+        if (slot < 0 || slot > 53) {
+            throw new IllegalArgumentException("Slot must be between 0 and 53");
+        }
+        clickHandler.setClickHandler(slot, handler);
+    }
+    
+    /**
+     * Removes the click handler for the specified slot.
+     * 
+     * @param slot the slot position to remove the handler from
+     */
+    public void removeClickHandler(int slot) {
+        clickHandler.removeClickHandler(slot);
+    }
+    
+    /**
+     * Gets the click handler for the specified slot.
+     * 
+     * @param slot the slot position
+     * @return the ClickHandler for the slot, or null if none is registered
+     */
+    public @Nullable ClickHandler getClickHandler(int slot) {
+        return clickHandler.getClickHandler(slot);
+    }
+    
+    /**
+     * Sets a handler that will be called when the inventory is closed.
+     * 
+     * @param closeHandler the consumer that will receive the close event
+     */
+    public void onClose(@NotNull Consumer<InventoryCloseEvent> closeHandler) {
+        clickHandler.setCloseHandler(closeHandler);
+    }
+    
+    /**
+     * Removes the close handler.
+     */
+    public void removeCloseHandler() {
+        clickHandler.removeCloseHandler();
+    }
+    
+    /**
+     * Registers this menu's event handlers with Bukkit.
+     * This method is called automatically in the constructor.
+     */
+    private void registerEvents(Plugin plugin) {
+        Bukkit.getPluginManager().registerEvents(clickHandler, plugin);
+    }
+    
+    /**
+     * Unregisters this menu's event handlers.
+     * This method is automatically called when the inventory is closed to prevent memory leaks.
+     * You only need to call this manually if you want to unregister events before closing the menu.
+     */
+    public void unregisterEvents() {
+        clickHandler.unregister();
     }
 
     /**
@@ -171,6 +244,14 @@ public class Menu {
         private int inventorySize;
         private Component inventoryTitle;
         private final HashSet<SlotItem> items = new HashSet<>();
+        private final Map<Integer, ClickHandler> clickHandlers = new HashMap<>();
+        private Consumer<InventoryCloseEvent> closeHandler;
+        private Plugin plugin;
+
+        public MenuBuilder plugin(@NotNull Plugin plugin) {
+            this.plugin = plugin;
+            return this;
+        }
 
         /**
          * Sets the size of the inventory.
@@ -244,7 +325,38 @@ public class Menu {
             if (inventoryTitle == null) {
                 throw new IllegalArgumentException("Inventory title cannot be null");
             }
-            return new Menu(this);
+            if (plugin == null) {
+                throw new IllegalArgumentException("Plugin cannot be null");
+            }
+            return new Menu(this, plugin);
+        }
+        
+        /**
+         * Registers a click handler for the specified slot.
+         * 
+         * @param slot the slot position (0-53 for chest inventories)
+         * @param handler the click handler to register
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if slot is invalid or handler is null
+         */
+        public MenuBuilder onClick(int slot, @NotNull ClickHandler handler) {
+            if (slot < 0 || slot > 53) {
+                throw new IllegalArgumentException("Slot must be between 0 and 53");
+            }
+            clickHandlers.put(slot, handler);
+            return this;
+        }
+        
+        /**
+         * Sets a handler that will be called when the inventory is closed.
+         * 
+         * @param closeHandler the consumer that will receive the close event
+         * @return this builder instance for method chaining
+         * @throws IllegalArgumentException if closeHandler is null
+         */
+        public MenuBuilder onClose(@NotNull Consumer<InventoryCloseEvent> closeHandler) {
+            this.closeHandler = closeHandler;
+            return this;
         }
     }
 }
