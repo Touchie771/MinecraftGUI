@@ -1,0 +1,22 @@
+name: Publish Gradle package
+
+on: [workflow_dispatch]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: gradle
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+      - name: Publish with Gradle
+        run: ./gradlew publish
+        env:
+          PUBLISH_USER: ${{ secrets.PUBLISH_USER }}
+          PUBLISH_PASSWORD: ${{ secrets.PUBLISH_PASSWORD }}
