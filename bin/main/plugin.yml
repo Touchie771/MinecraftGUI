@@ -1,0 +1,6 @@
+name: MinecraftGUI
+version: '1.0.0'
+main: me.touchie771.minecraftGUI.MinecraftGUI
+api-version: '1.21'
+authors: [ Touchie771 ]
+description: Minecraft library for creating GUIs more easily.
