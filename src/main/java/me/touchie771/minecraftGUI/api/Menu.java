@@ -194,6 +194,13 @@ public class Menu {
     public void removeCloseHandler() {
         clickHandler.removeCloseHandler();
     }
+
+    /**
+     * Removes all click handlers and the close handler.
+     */
+    public void clearHandlers() {
+        clickHandler.clear();
+    }
     
     /**
      * Registers this menu's event handlers with Bukkit.
