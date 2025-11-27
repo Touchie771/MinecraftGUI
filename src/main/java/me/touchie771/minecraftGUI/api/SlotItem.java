@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public record SlotItem(
     @Nullable Component itemName,
-    short itemSlot,
+    int itemSlot,
     @Nullable Material material,
     int quantity,
     @Nullable List<Component> lore,
@@ -43,7 +43,7 @@ public record SlotItem(
      * @param material The material
      * @param quantity The quantity
      */
-    public SlotItem(@NotNull Component itemName, short itemSlot, @NotNull Material material, int quantity) {
+    public SlotItem(@NotNull Component itemName, int itemSlot, @NotNull Material material, int quantity) {
         this(itemName, itemSlot, material, quantity, null, null, null, null, null);
     }
 }
