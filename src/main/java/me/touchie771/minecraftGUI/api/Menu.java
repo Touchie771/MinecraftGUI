@@ -11,11 +11,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -144,8 +140,8 @@ public class Menu {
      *
      * @return an unmodifiable set of SlotItem instances in this menu
      */
-    public HashSet<SlotItem> getItems() {
-        return (HashSet<SlotItem>) Collections.unmodifiableSet(this.items);
+    public Set<SlotItem> getItems() {
+        return Collections.unmodifiableSet(this.items);
     }
 
     /**
