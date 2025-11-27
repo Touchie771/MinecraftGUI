@@ -51,7 +51,7 @@ public class ExamplePlugin extends JavaPlugin {
             .items(
                 new SlotItem(
                     Component.text("Diamond Sword"),
-                    (short) 13,  // Center slot
+                    13,  // Center slot
                     Material.DIAMOND_SWORD,
                     1
                 )
@@ -72,15 +72,15 @@ Menu complexMenu = Menu.newBuilder()
     .size(54)
     .title(Component.text("Complex Menu"))
     .items(
-        new SlotItem(Component.text("Shop"), (short) 10, Material.CHEST, 1),
-        new SlotItem(Component.text("Settings"), (short) 13, Material.REDSTONE, 1),
-        new SlotItem(Component.text("Info"), (short) 16, Material.BOOK, 1)
+        new SlotItem(Component.text("Shop"), 10, Material.CHEST, 1),
+        new SlotItem(Component.text("Settings"), 13, Material.REDSTONE, 1),
+        new SlotItem(Component.text("Info"), 16, Material.BOOK, 1)
     )
     .build();
 
 // Modify menu after creation
 complexMenu.addItems(
-    new SlotItem(Component.text("New Item"), (short) 22, Material.EMERALD, 1)
+    new SlotItem(Component.text("New Item"), 22, Material.EMERALD, 1)
 );
 
 // Get item at specific slot (useful for click events)
@@ -124,7 +124,7 @@ Represents an item in a menu slot.
 
 **Parameters:**
 - `Component itemName` - Display name of the item
-- `short itemSlot` - Slot position (0-53 for chest inventories)
+- `int itemSlot` - Slot position (0-53 for chest inventories)
 - `Material material` - Minecraft material type
 - `int quantity` - Stack size (1-64)
 
