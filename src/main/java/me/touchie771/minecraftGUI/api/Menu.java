@@ -6,6 +6,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,9 +64,7 @@ public class Menu {
         }
 
         for (SlotItem item : items) {
-            ItemStack itemStack = new ItemStack(item.material(), item.quantity());
-            itemStack.editMeta(meta -> meta.displayName(item.itemName()));
-            menu.setItem(item.itemSlot(), itemStack);
+            menu.setItem(item.itemSlot(), createItemStack(item));
         }
         
         // Register event handlers
@@ -87,8 +86,13 @@ public class Menu {
             if (item.itemSlot() < 0 || item.itemSlot() > 53) {
                 throw new IllegalArgumentException("Item slot must be between 0 and 53");
             }
-            if (item.quantity() < 1 || item.quantity() > 64) {
-                throw new IllegalArgumentException("Item quantity must be between 1 and 64");
+            if (item.customItemStack() == null) {
+                if (item.material() == null) {
+                    throw new IllegalArgumentException("Item must have a material or customItemStack");
+                }
+                if (item.quantity() < 1 || item.quantity() > 64) {
+                    throw new IllegalArgumentException("Item quantity must be between 1 and 64");
+                }
             }
             if (this.items.stream().anyMatch(existing -> existing.itemSlot() == item.itemSlot())) {
                 throw new IllegalArgumentException("Slot " + item.itemSlot() + " is already occupied");
@@ -97,9 +101,7 @@ public class Menu {
         this.items.addAll(List.of(items));
 
         for (SlotItem item : items) {
-            ItemStack itemStack = new ItemStack(item.material(), item.quantity());
-            itemStack.editMeta(meta -> meta.displayName(item.itemName()));
-            this.menu.setItem(item.itemSlot(), itemStack);
+            this.menu.setItem(item.itemSlot(), createItemStack(item));
         }
     }
 
@@ -202,6 +204,42 @@ public class Menu {
         clickHandler.clear();
     }
     
+    private ItemStack createItemStack(SlotItem item) {
+        ItemStack itemStack;
+        if (item.customItemStack() != null) {
+            itemStack = item.customItemStack().clone();
+            if (item.quantity() > 0) {
+                itemStack.setAmount(item.quantity());
+            }
+        } else {
+            if (item.material() == null) {
+                throw new IllegalStateException("SlotItem at slot " + item.itemSlot() + " must have either a customItemStack or a material");
+            }
+            itemStack = new ItemStack(item.material(), item.quantity());
+        }
+
+        itemStack.editMeta(meta -> {
+            if (item.itemName() != null) {
+                meta.displayName(item.itemName());
+            }
+            if (item.lore() != null) {
+                meta.lore(item.lore());
+            }
+            if (item.enchantments() != null) {
+                item.enchantments().forEach((enchantment, level) -> meta.addEnchant(enchantment, level, true));
+            }
+            if (item.customModelData() != null) {
+                CustomModelDataComponent component = meta.getCustomModelDataComponent();
+                component.setFloats(List.of(item.customModelData().floatValue()));
+                meta.setCustomModelDataComponent(component);
+            }
+            if (item.damage() != null && meta instanceof org.bukkit.inventory.meta.Damageable damageable) {
+                damageable.setDamage(item.damage());
+            }
+        });
+        return itemStack;
+    }
+
     /**
      * Registers this menu's event handlers with Bukkit.
      * This method is called automatically in the constructor.

@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("me.touchie771:minecraftgui:1.0.0")
+    compileOnly("me.touchie771:minecraftgui:1.0.2")
 }
 ```
 
