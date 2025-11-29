@@ -2,6 +2,7 @@ package me.touchie771.minecraftGUI.api;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -350,6 +351,98 @@ public class Menu {
             }
             this.items.addAll(List.of(items));
             return this;
+        }
+
+        /**
+         * Fills all empty slots in the inventory with the specified material.
+         *
+         * @param material the material to fill with
+         * @return this builder instance
+         * @throws IllegalStateException if inventory size is not set
+         */
+        public MenuBuilder fillEmptyWith(@NotNull Material material) {
+            return fillEmptyWith(material, null);
+        }
+
+        /**
+         * Fills all empty slots in the inventory with the specified material and display name.
+         *
+         * @param material the material to fill with
+         * @param name the display name for the filler items, or null to keep default name
+         * @return this builder instance
+         * @throws IllegalStateException if inventory size is not set
+         */
+        public MenuBuilder fillEmptyWith(@NotNull Material material, @Nullable Component name) {
+            if (inventorySize <= 0) {
+                throw new IllegalStateException("Inventory size must be set before filling empty slots");
+            }
+
+            for (int i = 0; i < inventorySize; i++) {
+                if (isSlotFree(i)) {
+                    items.add(SlotItem.builder(i)
+                        .material(material)
+                        .itemName(name)
+                        .build());
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Fills all empty slots except the specified ones with the given material.
+         *
+         * @param material the material to fill with
+         * @param excludedSlots the slots to exclude from filling
+         * @return this builder instance
+         * @throws IllegalStateException if inventory size is not set
+         */
+        public MenuBuilder fillExcept(@NotNull Material material, int... excludedSlots) {
+            if (inventorySize <= 0) {
+                throw new IllegalStateException("Inventory size must be set before filling empty slots");
+            }
+
+            Set<Integer> excluded = new HashSet<>();
+            for (int slot : excludedSlots) {
+                excluded.add(slot);
+            }
+
+            for (int i = 0; i < inventorySize; i++) {
+                if (!excluded.contains(i) && isSlotFree(i)) {
+                    items.add(SlotItem.builder(i)
+                        .material(material)
+                        .build());
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Fills a range of slots with the specified material.
+         * The range is from start (inclusive) to end (exclusive).
+         *
+         * @param start the starting slot (inclusive)
+         * @param end the ending slot (exclusive)
+         * @param material the material to fill with
+         * @return this builder instance
+         * @throws IllegalArgumentException if start or end are invalid
+         */
+        public MenuBuilder fillRange(int start, int end, @NotNull Material material) {
+            if (start < 0 || end > 54 || start >= end) {
+                throw new IllegalArgumentException("Invalid range: " + start + " to " + end);
+            }
+
+            for (int i = start; i < end; i++) {
+                if (isSlotFree(i)) {
+                    items.add(SlotItem.builder(i)
+                        .material(material)
+                        .build());
+                }
+            }
+            return this;
+        }
+
+        private boolean isSlotFree(int slot) {
+            return items.stream().noneMatch(item -> item.itemSlot() == slot);
         }
 
         /**
