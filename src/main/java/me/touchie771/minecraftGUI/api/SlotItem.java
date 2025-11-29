@@ -130,6 +130,8 @@ public record SlotItem(
         public Builder addLore(@NotNull Component line) {
             if (this.lore == null) {
                 this.lore = new ArrayList<>();
+            } else if (!(this.lore instanceof ArrayList)) {
+                this.lore = new ArrayList<>(this.lore);
             }
             this.lore.add(line);
             return this;
@@ -144,6 +146,8 @@ public record SlotItem(
         public Builder addLore(@NotNull Component... lines) {
             if (this.lore == null) {
                 this.lore = new ArrayList<>();
+            } else if (!(this.lore instanceof ArrayList)) {
+                this.lore = new ArrayList<>(this.lore);
             }
             this.lore.addAll(Arrays.asList(lines));
             return this;
@@ -204,8 +208,8 @@ public record SlotItem(
                 itemSlot,
                 material,
                 quantity,
-                lore,
-                enchantments,
+                lore != null ? List.copyOf(lore) : null,
+                enchantments != null ? Map.copyOf(enchantments) : null,
                 customItemStack,
                 customModelData,
                 damage
