@@ -27,7 +27,10 @@ import java.util.function.Consumer;
  * Menu menu = Menu.newBuilder()
  *     .size(27)
  *     .title(Component.text("My Menu"))
- *     .items(new SlotItem(Component.text("Diamond"), (short) 0, Material.DIAMOND, 1))
+ *     .items(SlotItem.builder(0)
+ *         .itemName(Component.text("Diamond"))
+ *         .material(Material.DIAMOND)
+ *         .build())
  *     .build();
  * }</pre></p>
  */
@@ -276,7 +279,10 @@ public class Menu {
      * Menu menu = new MenuBuilder()
      *     .size(27)
      *     .title(Component.text("My Menu"))
-     *     .items(new SlotItem(Component.text("Diamond"), (short) 0, Material.DIAMOND, 1))
+     *     .items(SlotItem.builder(0)
+     *         .itemName(Component.text("Diamond"))
+     *         .material(Material.DIAMOND)
+     *         .build())
      *     .build();
      * }</pre></p>
      */

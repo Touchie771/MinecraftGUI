@@ -29,19 +29,15 @@ public class ConfirmationMenu {
      * @return A configured Menu instance
      */
     public static Menu create(@NotNull Plugin plugin, @NotNull Component title, @NotNull Runnable onConfirm, @NotNull Runnable onCancel) {
-        SlotItem confirmItem = new SlotItem(
-            Component.text("Confirm", NamedTextColor.GREEN),
-            (short) CONFIRM_SLOT,
-            Material.LIME_WOOL,
-            1
-        );
+        SlotItem confirmItem = SlotItem.builder(CONFIRM_SLOT)
+            .itemName(Component.text("Confirm", NamedTextColor.GREEN))
+            .material(Material.LIME_WOOL)
+            .build();
 
-        SlotItem cancelItem = new SlotItem(
-            Component.text("Cancel", NamedTextColor.RED),
-            (short) CANCEL_SLOT,
-            Material.RED_WOOL,
-            1
-        );
+        SlotItem cancelItem = SlotItem.builder(CANCEL_SLOT)
+            .itemName(Component.text("Cancel", NamedTextColor.RED))
+            .material(Material.RED_WOOL)
+            .build();
 
         ClickHandler confirmHandler = ClickHandler.newBuilder()
             .callback(event -> {
