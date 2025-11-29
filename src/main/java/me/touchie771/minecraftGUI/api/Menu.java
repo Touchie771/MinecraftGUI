@@ -236,6 +236,9 @@ public class Menu {
             if (item.damage() != null && meta instanceof org.bukkit.inventory.meta.Damageable damageable) {
                 damageable.setDamage(item.damage());
             }
+            if (item.itemFlags() != null) {
+                meta.addItemFlags(item.itemFlags().toArray(new org.bukkit.inventory.ItemFlag[0]));
+            }
         });
         return itemStack;
     }

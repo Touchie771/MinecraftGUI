@@ -3,14 +3,12 @@ package me.touchie771.minecraftGUI.api;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents an item that can be placed in a specific slot of a Minecraft GUI menu.
@@ -25,6 +23,7 @@ import java.util.Map;
  * @param customItemStack A base ItemStack to use (e.g. for items with NBT).
  * @param customModelData The custom model data ID.
  * @param damage The damage/durability value.
+ * @param itemFlags The item flags to apply (e.g., HIDE_ATTRIBUTES).
  */
 public record SlotItem(
     @Nullable Component itemName,
@@ -35,7 +34,8 @@ public record SlotItem(
     @Nullable Map<Enchantment, Integer> enchantments,
     @Nullable ItemStack customItemStack,
     @Nullable Integer customModelData,
-    @Nullable Integer damage
+    @Nullable Integer damage,
+    @Nullable Set<ItemFlag> itemFlags
 ) {
     /**
      * Legacy constructor for backward compatibility.
@@ -46,7 +46,7 @@ public record SlotItem(
      * @param quantity The quantity
      */
     public SlotItem(@NotNull Component itemName, int itemSlot, @NotNull Material material, int quantity) {
-        this(itemName, itemSlot, material, quantity, null, null, null, null, null);
+        this(itemName, itemSlot, material, quantity, null, null, null, null, null, null);
     }
 
     /**
@@ -72,6 +72,7 @@ public record SlotItem(
         private @Nullable ItemStack customItemStack;
         private @Nullable Integer customModelData;
         private @Nullable Integer damage;
+        private @Nullable Set<ItemFlag> itemFlags;
 
         private Builder(int itemSlot) {
             this.itemSlot = itemSlot;
@@ -165,6 +166,23 @@ public record SlotItem(
         }
 
         /**
+         * Adds an enchantment to the item.
+         *
+         * @param enchantment The enchantment to add
+         * @param level The level of the enchantment
+         * @return This builder instance for chaining
+         */
+        public Builder addEnchantment(@NotNull Enchantment enchantment, int level) {
+            if (this.enchantments == null) {
+                this.enchantments = new HashMap<>();
+            } else if (!(this.enchantments instanceof HashMap)) {
+                this.enchantments = new HashMap<>(this.enchantments);
+            }
+            this.enchantments.put(enchantment, level);
+            return this;
+        }
+
+        /**
          * Sets a custom ItemStack to use as base (e.g., for items with NBT).
          *
          * @param customItemStack The custom ItemStack
@@ -198,6 +216,49 @@ public record SlotItem(
         }
 
         /**
+         * Sets the item flags to apply.
+         *
+         * @param itemFlags The set of item flags
+         * @return This builder instance for chaining
+         */
+        public Builder itemFlags(@Nullable Set<ItemFlag> itemFlags) {
+            this.itemFlags = itemFlags;
+            return this;
+        }
+
+        /**
+         * Adds an item flag to the item.
+         *
+         * @param flag The item flag to add
+         * @return This builder instance for chaining
+         */
+        public Builder addItemFlag(@NotNull ItemFlag flag) {
+            if (this.itemFlags == null) {
+                this.itemFlags = new HashSet<>();
+            } else if (!(this.itemFlags instanceof HashSet)) {
+                this.itemFlags = new HashSet<>(this.itemFlags);
+            }
+            this.itemFlags.add(flag);
+            return this;
+        }
+
+        /**
+         * Adds multiple item flags to the item.
+         *
+         * @param flags The item flags to add
+         * @return This builder instance for chaining
+         */
+        public Builder addItemFlags(@NotNull ItemFlag... flags) {
+            if (this.itemFlags == null) {
+                this.itemFlags = new HashSet<>();
+            } else if (!(this.itemFlags instanceof HashSet)) {
+                this.itemFlags = new HashSet<>(this.itemFlags);
+            }
+            this.itemFlags.addAll(Arrays.asList(flags));
+            return this;
+        }
+
+        /**
          * Builds the SlotItem instance with the configured values.
          *
          * @return A new SlotItem instance
@@ -212,7 +273,8 @@ public record SlotItem(
                 enchantments != null ? Map.copyOf(enchantments) : null,
                 customItemStack,
                 customModelData,
-                damage
+                damage,
+                itemFlags != null ? Set.copyOf(itemFlags) : null
             );
         }
     }
