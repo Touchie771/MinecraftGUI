@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -277,5 +278,35 @@ class SlotItemTest {
         assertEquals(100, item.damage());
         assertEquals(Material.IRON_SWORD, item.material());
         assertEquals(12, item.itemSlot());
+    }
+
+    @Test
+    @DisplayName("Test builder with item flags")
+    void testBuilderWithItemFlags() {
+        SlotItem item = SlotItem.builder(0)
+            .material(Material.DIAMOND_SWORD)
+            .addItemFlag(ItemFlag.HIDE_ATTRIBUTES)
+            .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+            .build();
+
+        assertNotNull(item.itemFlags());
+        assertEquals(2, item.itemFlags().size());
+        assertTrue(item.itemFlags().contains(ItemFlag.HIDE_ATTRIBUTES));
+        assertTrue(item.itemFlags().contains(ItemFlag.HIDE_ENCHANTS));
+    }
+
+    @Test
+    @DisplayName("Test addEnchantment convenience method")
+    void testAddEnchantment() {
+        SlotItem item = SlotItem.builder(0)
+            .material(Material.DIAMOND_PICKAXE)
+            .addEnchantment(Enchantment.EFFICIENCY, 5)
+            .addEnchantment(Enchantment.UNBREAKING, 3)
+            .build();
+
+        assertNotNull(item.enchantments());
+        assertEquals(2, item.enchantments().size());
+        assertEquals(5, item.enchantments().get(Enchantment.EFFICIENCY));
+        assertEquals(3, item.enchantments().get(Enchantment.UNBREAKING));
     }
 }
