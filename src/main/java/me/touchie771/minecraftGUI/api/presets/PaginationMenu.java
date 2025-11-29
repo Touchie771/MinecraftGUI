@@ -79,7 +79,11 @@ public class PaginationMenu {
             PageItem item = items.get(i);
             int slot = i - startIndex;
             
-            menu.addItems(new SlotItem(item.name(), (short) slot, item.material(), item.quantity()));
+            menu.addItems(SlotItem.builder(slot)
+                .itemName(item.name())
+                .material(item.material())
+                .quantity(item.quantity())
+                .build());
             
             if (item.action() != null) {
                 menu.onClick(slot, ClickHandler.newBuilder()
@@ -90,12 +94,10 @@ public class PaginationMenu {
         }
 
         if (currentPage > 0) {
-            menu.addItems(new SlotItem(
-                Component.text("Previous Page", NamedTextColor.YELLOW),
-                (short) PREV_SLOT,
-                Material.ARROW,
-                1
-            ));
+            menu.addItems(SlotItem.builder(PREV_SLOT)
+                .itemName(Component.text("Previous Page", NamedTextColor.YELLOW))
+                .material(Material.ARROW)
+                .build());
             menu.onClick(PREV_SLOT, ClickHandler.newBuilder()
                 .callback(e -> {
                     currentPage--;
@@ -106,12 +108,10 @@ public class PaginationMenu {
         }
 
         if (currentPage < totalPages - 1) {
-             menu.addItems(new SlotItem(
-                Component.text("Next Page", NamedTextColor.YELLOW),
-                (short) NEXT_SLOT,
-                Material.ARROW,
-                1
-            ));
+             menu.addItems(SlotItem.builder(NEXT_SLOT)
+                .itemName(Component.text("Next Page", NamedTextColor.YELLOW))
+                .material(Material.ARROW)
+                .build());
             menu.onClick(NEXT_SLOT, ClickHandler.newBuilder()
                 .callback(e -> {
                     currentPage++;

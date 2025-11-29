@@ -7,6 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -116,6 +118,34 @@ public record SlotItem(
          */
         public Builder lore(@Nullable List<Component> lore) {
             this.lore = lore;
+            return this;
+        }
+
+        /**
+         * Adds a single line of lore to the item.
+         *
+         * @param line The lore line to add
+         * @return This builder instance for chaining
+         */
+        public Builder addLore(@NotNull Component line) {
+            if (this.lore == null) {
+                this.lore = new ArrayList<>();
+            }
+            this.lore.add(line);
+            return this;
+        }
+
+        /**
+         * Adds multiple lines of lore to the item.
+         *
+         * @param lines The lore lines to add
+         * @return This builder instance for chaining
+         */
+        public Builder addLore(@NotNull Component... lines) {
+            if (this.lore == null) {
+                this.lore = new ArrayList<>();
+            }
+            this.lore.addAll(Arrays.asList(lines));
             return this;
         }
 
